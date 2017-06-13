@@ -81,8 +81,7 @@ def get_video_links(link, loc):
         except:
             sys.exit('Not Found!!!')
 
-        # Acquires video links with the following exceptions
-        # Can add more extensions if necessary
+        # Acqures a list of downloadable video links
 
         video_links = [l['src'] for l in Soup(htm).find('div',attrs={'id':'streams'}).find_all('iframe',src=True)]
 
