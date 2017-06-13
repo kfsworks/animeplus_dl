@@ -16,8 +16,6 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
-URL_BASE = "http://www.animeplus.tv"
-
 # request headers while establishing connection with the url
 request_headers = {
     "Accept-Language": "en-US,en;q=0.5",
