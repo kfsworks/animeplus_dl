@@ -8,7 +8,7 @@ Animeplus.tv Download Script downloads anime episodes and movies. In case of mov
 Dependencies
 ------------
 
-  * Python 2.7 or better
+  * Python 2.7
   * BeautifulSoup (``pip install beautifulsoup4``)
 
 Tested on Ubuntu Linux and Windows. It should work on any Linux, OS X, or Windows machine as long as the dependencies are installed.
@@ -17,28 +17,24 @@ Usage
 -----
 
 Mandatory argument:
-  -l  <link that hosts video links>
+  -l, --link  <link that hosts video links>
 
  Optional Arguments:
-   -d <download directory>
+  -d, --directory <download directory>
 
 To download an entire series:
 
-    ~ $ python mfdl.py -m MANGA_NAME
-
-To download a specific chapter:
-
-    ~ $ python mfdl.py -l EPISODE_LINK -d DOWNLOAD_DIRECTORY
+    ~ $ python animeplus_dl.py -l LINK -d DIRECTORY
 
 Examples
 --------
 Download Kimi no na wa (2016) movie
 
-    ~ $ python animeplus-dl.py -l http://www.animeplus.tv/kimi-no-na-wa.-2016-online -d ~/Videos
+    ~ $ python animeplus_dl.py -l http://www.animeplus.tv/kimi-no-na-wa.-2016-online -d ~/Videos
 
 Download The Oregairu Zoku Ova Episode: 
 
-    ~ $ python animeplus-dl.py -l http://www.animeplus.tv/oregairu-2-ova-online -d ~/Videos
+    ~ $ python animeplus_dl.py -l http://www.animeplus.tv/oregairu-2-ova-online -d ~/Videos
 
 Notes
 -----
