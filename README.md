@@ -22,7 +22,7 @@ Mandatory argument:
  Optional Arguments:
   -d, --directory <download directory>
 
-To download an entire series:
+To download an episode:
 
     ~ $ python animeplus_dl.py -l LINK -d DIRECTORY
 
