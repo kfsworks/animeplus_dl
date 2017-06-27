@@ -1,20 +1,28 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 
-import urllib2
-import re
 import sys
+if sys.version_info[0] == 2:
+    from urllib2 import urlopen, Request
+elif sys.version_info[0] == 3:
+    from urllib.request import urlopen, Request
+else:
+    sys.exit('Python Version is not supported!!!')
+import re
 import os
 import logging
 import traceback
 from bs4 import BeautifulSoup
 import json
 import itertools
+import downloads
 
 logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s [%(funcName)s] %(message)s',
                     datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
+
+URL_BASE = "http://www.animeplus.tv"
 
 # request headers while establishing connection with the url
 request_headers = {
@@ -25,35 +33,11 @@ request_headers = {
     "Connection": "keep-alive"
 }
 
-def download(url,out_path):
-    u = urllib2.urlopen(url)
-    f = open(out_path, 'wb')
-    meta = u.info()
-    file_size = int(meta.getheaders("Content-Length")[0])
-    print "Downloading: %s Bytes: %s" % (out_path, file_size)
-
-    file_size_dl = 0
-    block_sz = 8192
-    while True:
-        buffer = u.read(block_sz)
-        if not buffer:
-            break
-        file_size_dl += len(buffer)
-        f.write(buffer)
-        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-        status = status + chr(8)*(len(status)+1)
-        print status,
-    f.close()
-
-def Soup(htm):
-    return BeautifulSoup(htm,'html.parser')
-
 # Get html source of url
 def gethtml(url):
-    return urllib2.urlopen(
-        urllib2.Request(url,
-                        headers=request_headers)
-    ).read()
+    return urlopen(
+        Request(url, headers=request_headers)
+    ).read().decode('utf-8')
 
 
 def get_video_links(link, loc):
@@ -79,9 +63,10 @@ def get_video_links(link, loc):
         except:
             sys.exit('Not Found!!!')
 
-        # Acqures a list of downloadable video links
+        # Acquires video links with the following exceptions
+        # Can add more extensions if necessary
 
-        video_links = [l['src'] for l in Soup(htm).find('div',attrs={'id':'streams'}).find_all('iframe',src=True)]
+        video_links = [l['src'] for l in BeautifulSoup(htm, 'html.parser').find('div',attrs={'id':'streams'}).find_all('iframe',src=True)]
 
         #print(video_links)
 
@@ -102,8 +87,9 @@ def get_video_links(link, loc):
                         dwn_link = vid_sub_link['link']
                         file_name = vid_sub_link['filename']
                         logger.info('Found a downloadable link: \n{0}'.format(dwn_link))
-                        download(url=dwn_link, out_path=os.path.join(loc, file_name))
-                        #logger.info('Downloaded {0} to {1}'.format(file_name, loc))
+                        #download(url=dwn_link, out_path=os.path.join(loc, file_name))
+                        downloads.download(url=dwn_link, out_path=os.path.join(loc, file_name), progress=True)
+                        logger.info('Downloaded {0} to {1}'.format(file_name, loc))
                         #try any one link and return to outer loop
                     except KeyboardInterrupt:
                         logger.debug('Cancelled by user!')
@@ -145,7 +131,6 @@ def get_video_links(link, loc):
             continue
         else:
             break
-
 
 # Main function
 def _Main():
