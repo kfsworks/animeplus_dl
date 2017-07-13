@@ -45,14 +45,11 @@ def download(url, out_path):
         print(status, end="\r")
     f.close()
 
-def Soup(htm):
-    return BeautifulSoup(htm,'html.parser')
-
 # Get html source of url
 def gethtml(url):
     return urlopen(
         Request(url, headers=request_headers)
-    ).read().decode('utf-8')
+    ).read().decode('utf-8', 'ignore)
 
 
 def get_video_links(link, loc):
@@ -80,7 +77,8 @@ def get_video_links(link, loc):
 
         # Acqures a list of downloadable video links
 
-        video_links = [l['src'] for l in Soup(htm).find('div',attrs={'id':'streams'}).find_all('iframe',src=True)]
+        video_links = [l['src'] for l in BeautifulSoup(htm,'html.parser').find('div',attrs={'id':'streams'})
+                       .find_all('iframe',src=True)]
 
         #print(video_links)
 
