@@ -49,7 +49,7 @@ def download(url, out_path):
 def gethtml(url):
     return urlopen(
         Request(url, headers=request_headers)
-    ).read().decode('utf-8', 'ignore)
+    ).read().decode('utf-8', 'ignore')
 
 
 def get_video_links(link, loc):
