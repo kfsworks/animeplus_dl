@@ -8,7 +8,7 @@ Animeplus.tv Download Script downloads anime episodes and movies. In case of mov
 Dependencies
 ------------
 
-  * Python 2 and Python 3
+  * Python3
   * BeautifulSoup (``pip install beautifulsoup4``)
   * downloads (``pip install downloads``)
 
