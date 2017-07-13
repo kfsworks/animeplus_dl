@@ -1,28 +1,20 @@
 #!/usr/bin/env python
 # -- coding: utf-8 --
 
-import sys
-if sys.version_info[0] == 2:
-    from urllib2 import urlopen, Request
-elif sys.version_info[0] == 3:
-    from urllib.request import urlopen, Request
-else:
-    sys.exit('Python Version is not supported!!!')
+from urllib.request import Request, urlopen
 import re
+import sys
 import os
 import logging
 import traceback
 from bs4 import BeautifulSoup
 import json
 import itertools
-import downloads
 
 logging.basicConfig(level=logging.DEBUG,
                             format='%(asctime)s [%(funcName)s] %(message)s',
                     datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
-
-URL_BASE = "http://www.animeplus.tv"
 
 # request headers while establishing connection with the url
 request_headers = {
@@ -32,6 +24,29 @@ request_headers = {
     "Referer": "http://thewebsite.com",
     "Connection": "keep-alive"
 }
+
+def download(url, out_path):
+    u = urlopen(url)
+    f = open(out_path, 'wb')
+    meta = u.info()
+    file_size = int(meta['Content-Length'])
+    print ("Downloading: %s Bytes: %s" % (out_path, file_size))
+
+    file_size_dl = 0
+    block_sz = 8192
+    while True:
+        buffer = u.read(block_sz)
+        if not buffer:
+            break
+        file_size_dl += len(buffer)
+        f.write(buffer)
+        status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
+        status = status + chr(8)*(len(status)+1)
+        print(status, end="\r")
+    f.close()
+
+def Soup(htm):
+    return BeautifulSoup(htm,'html.parser')
 
 # Get html source of url
 def gethtml(url):
@@ -63,10 +78,9 @@ def get_video_links(link, loc):
         except:
             sys.exit('Not Found!!!')
 
-        # Acquires video links with the following exceptions
-        # Can add more extensions if necessary
+        # Acqures a list of downloadable video links
 
-        video_links = [l['src'] for l in BeautifulSoup(htm, 'html.parser').find('div',attrs={'id':'streams'}).find_all('iframe',src=True)]
+        video_links = [l['src'] for l in Soup(htm).find('div',attrs={'id':'streams'}).find_all('iframe',src=True)]
 
         #print(video_links)
 
@@ -87,9 +101,8 @@ def get_video_links(link, loc):
                         dwn_link = vid_sub_link['link']
                         file_name = vid_sub_link['filename']
                         logger.info('Found a downloadable link: \n{0}'.format(dwn_link))
-                        #download(url=dwn_link, out_path=os.path.join(loc, file_name))
-                        downloads.download(url=dwn_link, out_path=os.path.join(loc, file_name), progress=True)
-                        logger.info('Downloaded {0} to {1}'.format(file_name, loc))
+                        download(url=dwn_link, out_path=os.path.join(loc, file_name))
+                        #logger.info('Downloaded {0} to {1}'.format(file_name, loc))
                         #try any one link and return to outer loop
                     except KeyboardInterrupt:
                         logger.debug('Cancelled by user!')
@@ -116,7 +129,7 @@ def get_video_links(link, loc):
             # If the link points to an episode,
             # then stops the script when the download is a success
             # for any one file
-            if 'movie' in link:
+            if not 'episode' in link:
                 continue
             else:
                 break
@@ -134,15 +147,15 @@ def get_video_links(link, loc):
 
 # Main function
 def _Main():
-
+   '''
     import argparse
     parser = argparse.ArgumentParser(description='Download anime from animeplus.tv')
     parser.add_argument('--link', '-l', type=str, help='Enter link which is hosting the video')
     parser.add_argument('--directory', '-d', type=str, default='.' help='Give folder location')
     args = parser.parse_args()
     get_video_links(link=args.link, loc=args.directory)
-
-    #get_video_links('http://www.animeplus.tv/omamori-himari-episode-10-online', loc='.')
+    '''
+   get_video_links('www.animeplus.tv/shuffle-episode-3-online', loc='.')
 
 
 if __name__ == '__main__':
