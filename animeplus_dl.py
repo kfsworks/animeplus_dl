@@ -127,10 +127,10 @@ def get_video_links(link, loc):
             # If the link points to an episode,
             # then stops the script when the download is a success
             # for any one file
-            if not 'episode' in link:
-                continue
-            else:
+            if 'episode' or 'special' or 'ova' or 'OVA' in link:
                 break
+            else:
+                continue
 
         # If any exceptions
         # while acquiring links from a playlist
