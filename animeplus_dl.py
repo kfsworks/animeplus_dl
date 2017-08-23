@@ -127,10 +127,12 @@ def get_video_links(link, loc):
             # If the link points to an episode,
             # then stops the script when the download is a success
             # for any one file
-            if 'episode' or 'special' or 'ova' or 'OVA' in link:
-                break
             else:
-                continue
+                errs = None
+                if 'episode' or 'special' or 'ova' or 'OVA' in link:
+                    break
+                else:
+                    continue
 
         # If any exceptions
         # while acquiring links from a playlist
@@ -146,14 +148,14 @@ def get_video_links(link, loc):
 # Main function
 def _Main():
    '''
-    import argparse
-    parser = argparse.ArgumentParser(description='Download anime from animeplus.tv')
-    parser.add_argument('--link', '-l', type=str, help='Enter link which is hosting the video')
-    parser.add_argument('--directory', '-d', type=str, default='.' help='Give folder location')
-    args = parser.parse_args()
-    get_video_links(link=args.link, loc=args.directory)
+   import argparse
+   parser = argparse.ArgumentParser(description='Download anime from animeplus.tv')
+   parser.add_argument('--link', '-l', type=str, help='Enter link which is hosting the video')
+   parser.add_argument('--directory', '-d', type=str, default='.' help='Give folder location')
+   args = parser.parse_args()
+   get_video_links(link=args.link, loc=args.directory)
     '''
-   get_video_links('www.animeplus.tv/shuffle-episode-3-online', loc='.')
+   get_video_links('http://www.animeplus.tv/oreimo-s2-episode-5-online', loc='D:\\videos\\anime')
 
 
 if __name__ == '__main__':
