@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -- coding: utf-8 --
 
 from urllib.request import Request, urlopen
@@ -12,7 +12,7 @@ import json
 import itertools
 
 logging.basicConfig(level=logging.DEBUG,
-                            format='%(asctime)s [%(funcName)s] %(message)s',
+                    format='%(asctime)s [%(funcName)s] %(message)s',
                     datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ def download(url, out_path):
     f = open(out_path, 'wb')
     meta = u.info()
     file_size = int(meta['Content-Length'])
-    print ("Downloading: %s Bytes: %s" % (out_path, file_size))
+    print("Downloading: %s Bytes: %s" % (out_path, file_size))
 
     file_size_dl = 0
     block_sz = 8192
@@ -41,7 +41,7 @@ def download(url, out_path):
         file_size_dl += len(buffer)
         f.write(buffer)
         status = r"%10d  [%3.2f%%]" % (file_size_dl, file_size_dl * 100. / file_size)
-        status = status + chr(8)*(len(status)+1)
+        status = status + chr(8) * (len(status) + 1)
         print(status, end="\r")
     f.close()
 
@@ -50,7 +50,6 @@ def gethtml(url):
     return urlopen(
         Request(url, headers=request_headers)
     ).read().decode('utf-8', 'ignore')
-
 
 def get_video_links(link, loc):
 
@@ -63,35 +62,29 @@ def get_video_links(link, loc):
         os.mkdir(loc)
 
     logger.info('Searching: {0}'.format(link))
-    playlist = 1
 
-    while True:
+    for playlist in range(1, 6):
 
         errs = None
 
         # This stops the script if any error occurs while establishing the connection
         try:
-            htm = gethtml('{0}/{1}'.format(link,playlist))
+            htm = gethtml('{0}/{1}'.format(link, playlist))
         except:
             sys.exit('Not Found!!!')
 
-        # Acqures a list of downloadable video links
-
-        video_links = [l['src'] for l in BeautifulSoup(htm,'html.parser').find('div',attrs={'id':'streams'})
-                       .find_all('iframe',src=True)]
-
-        #print(video_links)
+        # Acquires a list of downloadable video links
+        video_links = [l['src'] for l in BeautifulSoup(htm, 'html.parser').find('div', attrs={'id': 'streams'})
+            .find_all('iframe', src=True)]
 
         # Iterates through all video links found in the playlist
         for video_link in video_links:
 
             try:
-                #acquires javascript object from the html link which contains links
+                # acquires javascript object from the html link which contains links
                 video_sub_links_dict = json.loads(re.search(r'var\svideo_links\s*\=\s*({.*})\;',
                                                             gethtml(video_link)).group(1))
-
-
-                #iterates through sublinks by going through the javascript object
+                # iterates through sublinks by going through the javascript object
                 vid_sub_links = list(itertools.chain.from_iterable(video_sub_links_dict['normal'].values()))
 
                 for vid_sub_link in vid_sub_links:
@@ -100,15 +93,15 @@ def get_video_links(link, loc):
                         file_name = vid_sub_link['filename']
                         logger.info('Found a downloadable link: \n{0}'.format(dwn_link))
                         download(url=dwn_link, out_path=os.path.join(loc, file_name))
-                        #logger.info('Downloaded {0} to {1}'.format(file_name, loc))
-                        #try any one link and return to outer loop
+                        # logger.info('Downloaded {0} to {1}'.format(file_name, loc))
+                        # try any one link and return to outer loop
                     except KeyboardInterrupt:
                         logger.debug('Cancelled by user!')
                         sys.exit()
                     except:
                         traceback.print_exc()
                         logger.info('Moving on to the next sublink')
-                        #if failure occurs move onto the next sublink
+                        # if failure occurs move onto the next sublink
                         continue
                     else:
                         break
@@ -129,7 +122,7 @@ def get_video_links(link, loc):
             # for any one file
             else:
                 errs = None
-                if 'episode' or 'special' or 'ova' or 'OVA' in link:
+                if any(s in link for s in ['episode', 'special', 'ova', 'OVA']):
                     break
                 else:
                     continue
@@ -140,23 +133,18 @@ def get_video_links(link, loc):
         if errs is not None:
             logger.debug('All downloadable links failed in playlist!')
             logger.info('Moving on to the next playlist!')
-            playlist += 1
             continue
         else:
             break
 
 # Main function
 def _Main():
-   '''
-   import argparse
-   parser = argparse.ArgumentParser(description='Download anime from animeplus.tv')
-   parser.add_argument('--link', '-l', type=str, help='Enter link which is hosting the video')
-   parser.add_argument('--directory', '-d', type=str, default='.' help='Give folder location')
-   args = parser.parse_args()
-   get_video_links(link=args.link, loc=args.directory)
-    '''
-   get_video_links('http://www.animeplus.tv/oreimo-s2-episode-5-online', loc='D:\\videos\\anime')
-
+    import argparse
+    parser = argparse.ArgumentParser(description='Download anime from animeplus.tv')
+    parser.add_argument('--link', '-l', type=str, help='Enter link which is hosting the video')
+    parser.add_argument('--directory', '-d', type=str, default='.', help='Give folder location')
+    args = parser.parse_args()
+    get_video_links(link=args.link, loc=args.directory)
 
 if __name__ == '__main__':
     _Main()
