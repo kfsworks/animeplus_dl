@@ -3,14 +3,13 @@ Animeplus.tv Download Script
 
 About
 -----
-Animeplus.tv Download Script downloads anime episodes and movies. In case of movies, multiple video files will be downloaded. All that is required is the link where the videos are hosted and played.
+This Animeplus.tv download Script downloads anime episodes and movies. In case of movies, multiple video files will be downloaded. All that is required is the link(from animeplus.tv) where the videos are hosted and played.
 
 Dependencies
 ------------
 
   * Python3
   * BeautifulSoup (``pip install beautifulsoup4``)
-  * downloads (``pip install downloads``)
 
 Tested on Ubuntu Linux and Windows. It should work on any Linux, OS X, or Windows machine as long as the dependencies are installed.
 
@@ -39,4 +38,4 @@ Download The Oregairu Zoku Ova Episode:
 
 Notes
 -----
-Please do not overuse and abuse this and destroy Animeplus.tv. Please donate some cash to animeplus.tv I really would not like people to destroy Animeplus because of greedy downloading. Use this wisely and don't be evil.
+Please do not overuse and abuse this and destroy Animeplus.tv in the process. Please donate some money to animeplus.tv. I really would not like it if animeplus.tv were damaged due to greedy downloading. Please use this sparingly. 
