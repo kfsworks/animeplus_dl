@@ -9,7 +9,6 @@ Dependencies
 ------------
 
   * Python3
-  * BeautifulSoup (``pip install beautifulsoup4``)
 
 Tested on Ubuntu Linux and Windows. It should work on any Linux, OS X, or Windows machine as long as the dependencies are installed.
 
