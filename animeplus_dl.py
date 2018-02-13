@@ -2,12 +2,11 @@
 # -- coding: utf-8 --
 
 from urllib.request import Request, urlopen
-import re
 import sys
 import os
 import logging
 import traceback
-from bs4 import BeautifulSoup
+import re
 import json
 import itertools
 
@@ -74,8 +73,9 @@ def get_video_links(link, loc):
             sys.exit('Not Found!!!')
 
         # Acquires a list of downloadable video links
-        video_links = [l['src'] for l in BeautifulSoup(htm, 'html.parser').find('div', attrs={'id': 'streams'})
-            .find_all('iframe', src=True)]
+        #video_links = [l['src'] for l in BeautifulSoup(htm, 'html.parser').find('div', attrs={'id': 'streams'})
+        #    .find_all('iframe', src=True)]
+        video_links = re.findall(r'iframe\s*src\s*=\s*"(.+?)"', htm)
 
         # Iterates through all video links found in the playlist
         for video_link in video_links:
