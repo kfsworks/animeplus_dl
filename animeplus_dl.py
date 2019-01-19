@@ -15,8 +15,8 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt="%H:%M:%S")
 logger = logging.getLogger(__name__)
 
-# request headers while establishing connection with the url
 request_headers = {
+    # request headers while establishing connection with the url
     "Accept-Language": "en-US,en;q=0.5",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:40.0) "
     "Gecko/20100101 Firefox/40.0",
@@ -28,8 +28,11 @@ request_headers = {
 
 
 def download(url, out_path):
+    # Download a file
+    # Requires url and output path
     u = urlopen(url)
     f = open(out_path, 'wb')
+
     meta = u.info()
     file_size = int(meta['Content-Length'])
     print("Downloading: %s Bytes: %s" % (out_path, file_size))
@@ -46,19 +49,19 @@ def download(url, out_path):
             file_size_dl, file_size_dl * 100. / file_size)
         status = status + chr(8) * (len(status) + 1)
         print(status, end="\r")
-    f.close()
 
-# Get html source of url
+    f.close()
 
 
 def gethtml(url):
+    # Get html source of url
     return urlopen(
         Request(url, headers=request_headers)
     ).read().decode('utf-8', 'ignore')
 
 
 def get_video_links(link, loc):
-
+    # Putting all functions together
     if 'animeplus.tv' not in link:
         sys.exit('Link does not belong to animeplus.tv')
     if not link.startswith('http://'):
@@ -175,10 +178,9 @@ def get_video_links(link, loc):
         else:
             break
 
-# Main function
-
 
 def _Main():
+    # Main function
     import argparse
     parser = argparse.ArgumentParser(
         description='Download anime from animeplus.tv')
