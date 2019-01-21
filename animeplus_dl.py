@@ -53,47 +53,103 @@ def download(url, out_path):
     f.close()
 
 
+def get_iframe_links(html_source):
+    return re.findall(r'iframe\s*src\s*=\s*"(.+?)"', html_source)
+
+
 def gethtml(url):
     # Get html source of url
-    return urlopen(
-        Request(url, headers=request_headers)
-    ).read().decode('utf-8', 'ignore')
+    try:
+        request = urlopen(Request(url, headers=request_headers))
+    except (KeyboardInterrupt, SystemExit):
+        logger.info('Cancelled by user!')
+        sys.exit()
+    except HTTPError as err:
+        if err.code == 404:
+            logger.error('Link not found!')
+        else:
+            logger.error('Check connection!')
+        sys.exit()
+    return request.read().decode('utf-8', 'ignore')
 
 
 def get_video_links(link, loc):
-    # Putting all functions together
-    if 'animeplus.tv' not in link:
-        sys.exit('Link does not belong to animeplus.tv')
+
     if not link.startswith('http://'):
         link = 'http://{0}'.format(link)
-
     if not os.path.exists(loc):
         os.mkdir(loc)
 
+    if 'animeplus.tv' in link or (
+        'animetoon.org' in link and 'episode' in link
+    ):
+        get_animeplus_video_links(link, loc)
+    elif 'gooddrama.to' in link or 'animetoon.org' in link:
+        get_gooddrama_video_links(link, loc)
+    else:
+        logger.error('Not supported')
+        sys.exit()
+
+
+def get_gooddrama_video_links(link, loc):
+    # Get gooddrama links
+    html_source = gethtml(link)
+    parts_len = int(max(set(re.findall(r'Part (\d)', html_source))))
+    playlist_len = int(max(set(re.findall(r'Playlist (\d)', html_source))))
+
+    for part in range(1, parts_len + 1):
+        for playlist in range(1, playlist_len + 1):
+            video_links = get_iframe_links(
+                gethtml(f'{link}/{playlist}-{part}')
+            )
+            video_link = video_links[playlist - 1]
+            video_sub_links_dict = json.loads(
+                re.search(
+                    r'var\svideo_links\s*\=\s*({.*})\;',
+                    gethtml(video_link)
+                ).group(1)
+            )
+            video_sub_link = video_sub_links_dict['normal']['storage'][0]
+            dwn_link = video_sub_link['link']
+            file_name = video_sub_link['filename']
+            logger.info(
+                'Found a downloadable link: \n{0}'.format(dwn_link)
+            )
+            try:
+                download(
+                    url=dwn_link,
+                    out_path=os.path.join(loc, file_name)
+                )
+            except (KeyboardInterrupt, SystemExit):
+                logger.info('Cancelled by user!')
+                sys.exit()
+            except Exception as e:
+                logger.error(e)
+                continue
+            else:
+                break
+
+
+def get_animeplus_video_links(link, loc):
+    # Get animeplus.tv links
     logger.info('Searching: {0}'.format(link))
 
-    def _search_playlist(link, playlist=1):
+    def _search_playlist(link, playlist):
         # This stops the script if any error occurs
         # while establishing the connection
-        try:
-            htm = gethtml('{0}/{1}'.format(link, playlist))
-        except (KeyboardInterrupt, SystemExit):
-            logger.debug('Cancelled by user!')
-            sys.exit()
-        except HTTPError as err:
-            if err.code == 404:
-                logger.debug('Link not found!')
-                sys.exit()
-            else:
-                logger.debug('Check connection!')
-                sys.exit()
+        html_source = gethtml('{0}/{1}'.format(link, playlist))
         # Acquires a list of downloadable video links
         return {
-            'video_links': re.findall(r'iframe\s*src\s*=\s*"(.+?)"', htm),
-            'playlist_length': len(re.findall(r'Playlist \d', htm))
+            'video_links': get_iframe_links(html_source),
+            'playlist_length': len(re.findall(r'Playlist \d', html_source))
         }
-    playlist_length = _search_playlist(link)['playlist_length']
-    video_links = _search_playlist(link)['video_links']
+    if ('animetoon.org' in link):
+        playlist_num = ''
+    else:
+        playlist_num = 1
+    first_playlist = _search_playlist(link, playlist_num)
+    playlist_length = first_playlist['playlist_length']
+    video_links = first_playlist['video_links']
 
     for playlist in range(1, playlist_length+1):
         errs = None
@@ -183,7 +239,7 @@ def _Main():
     # Main function
     import argparse
     parser = argparse.ArgumentParser(
-        description='Download anime from animeplus.tv')
+        description='Download anime from animeplus.tv or gooddrama')
     parser.add_argument('link', type=str,
                         help='Enter link which is hosting the video')
     parser.add_argument('--directory', '-d', type=str,
